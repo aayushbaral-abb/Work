@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aayush Baral-Work</title>
+    <style>
+        /* --- CSS Styling --- */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        /* Lock Screen Styles */
+        #lock-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        #password-input {
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            width: 250px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        #login-button {
+            padding: 10px 20px;
+            margin-top: 15px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        #login-button:hover {
+            background-color: #d35400;
+        }
+
+        #message {
+            margin-top: 10px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Content Styles */
+        #main-content {
+            display: none; /* Initially hidden by JS */
+            padding: 20px;
+        }
+
+        nav {
+            background-color: #34495e;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        nav button.active {
+            background-color: #e67e22;
+            border-radius: 5px;
+        }
+
+        nav button:not(.active):hover {
+            background-color: #4a637d;
+        }
+
+        .page-content {
+            display: none; /* All pages hidden by default */
+            padding: 20px 0;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        /* Embed Container Styles */
+        .embed-container {
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* LAZY LOAD & ACTION STYLES */
+        /* Initially hide the iframe content (key to preventing load) */
+        .embed-container iframe {
+            display: none; 
+            width: 100%;
+            height: 650px;
+            border: none;
+            background-color: #ecf0f1; /* Placeholder background */
+            transition: opacity 0.3s;
+        }
+        
+        /* Style the clickable header to look like an action area */
+        .lazy-load-container h3 {
+            margin-top: 0;
+            color: #2980b9;
+            padding: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer; /* Indicate it's clickable */
+            background-color: #f0f8ff; 
+            transition: background-color 0.3s;
+            display: flex; /* For alignment with action bar */
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .lazy-load-container h3:hover {
+            background-color: #e6f7ff;
+        }
+        
+        /* Style the loading text indicator */
+        .load-indicator {
+            font-size: 0.9em;
+            font-weight: normal;
+            color: #e67e22; /* Highlight color */
+            margin-left: 10px;
+        }
+
+        /* Styles for the action buttons */
+        .iframe-actions {
+            display: none; /* Hidden until the iframe is loaded */
+        }
+        .iframe-actions.active {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .refresh-button {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .refresh-button:hover {
+            background-color: #2980b9;
+        }
+
+        .close-button {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .close-button:hover {
+            background-color: #c0392b;
+        }
+        /* END LAZY LOAD & ACTION STYLES */
+
+
+        .shortcut-link {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 25px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .shortcut-link:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <h1>🔒 Work Dashboard Access</h1>
+        <p>Please enter the password to view the content.</p>
+        <input type="password" id="password-input" placeholder="Enter Password">
+        <button id="login-button">Login</button>
+        <p id="message"></p>
+    </div>
+
+    <div id="main-content">
+        <header>
+            <nav>
+                <button class="nav-button active" onclick="showPage('nepse')">📈 Nepse</button>
+                <button class="nav-button" onclick="showPage('shortcuts')">🔗 Sites Shortcut</button>
+            </nav>
+        </header>
+
+        <div id="nepse" class="page-content active">
+            <h2>📈 Nepse Sites Embedded Views</h2>
+
+            <div class="embed-container lazy-load-container" id="nepse-chart-container" onclick="loadIframe(this)">
+                <h3>
+                    NEPSE Alpha Chart <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="nepse-chart-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('nepse-chart-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('nepse-chart-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/nepse-chart?" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="broker-holding-changes-container" onclick="loadIframe(this)">
+                <h3>
+                    Broker Holding Changes <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="broker-holding-changes-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('broker-holding-changes-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('broker-holding-changes-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/broker-holding-changes" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="broker-holding-container" onclick="loadIframe(this)">
+                <h3>
+                    Broker Holding <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="broker-holding-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('broker-holding-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('broker-holding-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/broker-holding" title="Nepse Alpha"></iframe>
+            </div>
+            
+            <div class="embed-container lazy-load-container" id="floorsheet-history-container" onclick="loadIframe(this)">
+                <h3>
+                    Broker Floorsheet History <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="floorsheet-history-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('floorsheet-history-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('floorsheet-history-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://www.nepsealpha.com/floorsheet-history" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="floorsheet-analysis-container" onclick="loadIframe(this)">
+                <h3>
+                    Daily Floorsheet Analysis <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="floorsheet-analysis-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('floorsheet-analysis-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('floorsheet-analysis-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/floorsheet-analysis" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="promoter-lock-in-container" onclick="loadIframe(this)">
+                <h3>
+                    Stock’s Promoter Lock In Time <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="promoter-lock-in-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('promoter-lock-in-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('promoter-lock-in-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/promoter-lock-in" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="traded-stocks-container" onclick="loadIframe(this)">
+                <h3>
+                    Stock’s List Acc. to Market Cap <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="traded-stocks-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('traded-stocks-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('traded-stocks-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/traded-stocks" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="stock-heat-map-container" onclick="loadIframe(this)">
+                <h3>
+                    Nepse Heat Map <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="stock-heat-map-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('stock-heat-map-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('stock-heat-map-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/stock-heat-map-live" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="trending-stocks-container" onclick="loadIframe(this)">
+                <h3>
+                    Trending Stocks <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="trending-stocks-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('trending-stocks-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('trending-stocks-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepsealpha.com/trending-stocks?v=1.1" title="Nepse Alpha"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="nepalstock-container" onclick="loadIframe(this)">
+                <h3>
+                    Nepal Stock Exchange <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="nepalstock-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('nepalstock-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('nepalstock-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepalstock.com/" title="Nepal Stock Exchange"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="news-alerts-container" onclick="loadIframe(this)">
+                <h3>
+                    Nepal Stock Exchange News/Alerts <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="news-alerts-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('news-alerts-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('news-alerts-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://nepalstock.com/news-and-alerts" title="Nepal Stock Exchange"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="sharehubnepal-container" onclick="loadIframe(this)">
+                <h3>
+                    Share Hub <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="sharehubnepal-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('sharehubnepal-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('sharehubnepal-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://sharehubnepal.com/" title="Share Hub"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="merolagani-container" onclick="loadIframe(this)">
+                <h3>
+                    Mero Lagani <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="merolagani-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('merolagani-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('merolagani-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://eng.merolagani.com/" title="Mero Lagani"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="merolagani-list-container" onclick="loadIframe(this)">
+                <h3>
+                    All Listed Stock - Mero Lagani <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="merolagani-list-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('merolagani-list-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('merolagani-list-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://eng.merolagani.com/CompanyList.aspx" title="Mero Lagani"></iframe>
+            </div>
+
+            <div class="embed-container lazy-load-container" id="sharesansar-container" onclick="loadIframe(this)">
+                <h3>
+                    Share Sansar <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="sharesansar-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('sharesansar-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('sharesansar-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://www.sharesansar.com/" title="Share Sansar"></iframe>
+            </div>
+            
+        </div>
+
+        <div id="shortcuts" class="page-content">
+            <h2>🔗 Site Shortcuts & Embedded</h2>
+            <a href="https://temp-mail.org/" target="_blank" class="shortcut-link" style="background-color: #FF0000;">Temp Email Generator-1</a>
+            <a href="https://tempmailo.com/" target="_blank" class="shortcut-link" style="background-color: #FF0000;">Temp Email Generator-2</a>
+            <a href="https://www.freeconvert.com/" target="_blank" class="shortcut-link" style="background-color: #1DA1F2;">Any File Conveter</a>
+            <a href="https://image.pi7.org/resize-image-pixel" target="_blank" class="shortcut-link" style="background-color: #333;">Image Resize(px)</a>
+            <a href="https://imagecompressor.11zon.com/en/image-compressor/compress-png-image" target="_blank" class="shortcut-link" style="background-color: #333;">Png to Png(kb)</a>
+            
+
+            <h3>-- Embedded Site Views --</h3>
+
+            <div class="embed-container lazy-load-container" id="google-search-container" onclick="loadIframe(this)">
+                <h3>
+                    Google Search <span class="load-indicator"> [Click to Load]</span>
+                    <span class="iframe-actions" data-iframe-id="google-search-container">
+                        <button class="action-button refresh-button" onclick="event.stopPropagation(); refreshIframe('google-search-container')">🔄 Refresh</button>
+                        <button class="action-button close-button" onclick="event.stopPropagation(); closeIframe('google-search-container')">❌ Close</button>
+                    </span>
+                </h3>
+                <iframe class="lazy-iframe" data-src="https://www.google.com/search?igu=1&q=current+time" title="Google Search"></iframe>
+            </div>
+
+            
+
+        </div>
+
+    </div>
+
+    <script>
+        const error= "messages"; 
+        const lockScreen = document.getElementById('lock-screen');
+        const mainContent = document.getElementById('main-content');
+        const passwordInput = document.getElementById('password-input');
+        const loginButton = document.getElementById('login-button');
+        const message = document.getElementById('message');
+
+        /**
+         * Finds and returns elements related to a specific embed container.
+         * @param {string} containerId - The ID of the parent embed-container.
+         * @returns {object} An object containing the container, iframe, actions, and indicator elements.
+         */
+        function getIframeElements(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return {};
+
+            return {
+                container: container,
+                iframe: container.querySelector('.lazy-iframe'),
+                actions: container.querySelector('.iframe-actions'),
+                indicator: container.querySelector('.load-indicator')
+            };
+        }
+
+        /**
+         * Function to handle the login attempt
+         */
+        function checkPassword() {
+            const control = passwordInput.value;
+
+            if (control === error) {
+                // Successful Login: Hide lock screen and show content
+                lockScreen.style.opacity = '0';
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                }, 600); // Wait for the fade-out transition
+                message.textContent = '';
+                passwordInput.value = ''; // Clear input on success
+            } else {
+                // Failed Login: Show error message
+                message.textContent = '❌ Incorrect Password. Try again.';
+                passwordInput.value = ''; // Clear input on failure
+                passwordInput.focus(); // Focus for quick re-entry
+            }
+        }
+
+        /**
+         * Function to dynamically load the iframe content (Lazy Load)
+         * @param {HTMLElement} containerElement - The clicked .lazy-load-container element.
+         */
+        function loadIframe(containerElement) {
+            const iframe = containerElement.querySelector('.lazy-iframe');
+            const loadIndicator = containerElement.querySelector('.load-indicator');
+            const actions = containerElement.querySelector('.iframe-actions');
+            
+            // Check if the iframe is already loaded
+            if (iframe.hasAttribute('src')) {
+                // If loaded, allow click to close/open for convenience
+                if (iframe.style.display === 'block') {
+                    closeIframe(containerElement.id);
+                } else {
+                    iframe.style.display = 'block';
+                }
+                return;
+            }
+
+            const dataSrc = iframe.getAttribute('data-src');
+            
+            if (dataSrc) {
+                // 1. Set the actual src attribute, which triggers the load
+                iframe.setAttribute('src', dataSrc);
+                
+                // 2. Make the iframe visible
+                iframe.style.display = 'block';
+
+                // 3. Hide the 'Click to Load' indicator
+                if (loadIndicator) {
+                    loadIndicator.style.display = 'none';
+                }
+
+                // 4. Show the action buttons (Refresh/Close)
+                if (actions) {
+                    actions.classList.add('active');
+                }
+
+                // Optional: Change the header style to show it's loaded
+                const h3 = containerElement.querySelector('h3');
+                if (h3) {
+                     h3.style.backgroundColor = '#d5e9f8';
+                     h3.style.cursor = 'pointer'; // Keep cursor to indicate re-click can close
+                }
+            }
+        }
+
+        /**
+         * Function to close (unload) a specific iframe.
+         * @param {string} containerId - The ID of the parent embed-container.
+         */
+        function closeIframe(containerId) {
+            const { container, iframe, actions, indicator } = getIframeElements(containerId);
+
+            if (iframe) {
+                // 1. Hide the iframe
+                iframe.style.display = 'none';
+                
+                // 2. **Unload the content** by removing the src attribute.
+                // Note: The content itself might not be fully purged from memory immediately by the browser, 
+                // but this stops the page from running and generally reduces the memory footprint.
+                iframe.removeAttribute('src'); 
+
+                // 3. Show the 'Click to Load' indicator again
+                if (indicator) {
+                    indicator.style.display = 'inline';
+                }
+
+                // 4. Hide the action buttons
+                if (actions) {
+                    actions.classList.remove('active');
+                }
+
+                // 5. Reset header style
+                if (container) {
+                    const h3 = container.querySelector('h3');
+                    if (h3) {
+                         h3.style.backgroundColor = '#f0f8ff';
+                    }
+                }
+            }
+        }
+
+        /**
+         * Function to refresh a specific iframe.
+         * @param {string} containerId - The ID of the parent embed-container.
+         */
+        function refreshIframe(containerId) {
+            const { iframe } = getIframeElements(containerId);
+            
+            if (iframe && iframe.hasAttribute('src')) {
+                // Simply set the src again, which forces a reload
+                iframe.src = iframe.src;
+            }
+        }
+
+        // Event Listeners for Login
+        loginButton.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', function(event) {
+            // Check if the Enter key was pressed
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+
+        // Function to switch between 'Nepse' and 'Sites Shortcut' pages
+        function showPage(pageId) {
+            // 1. Hide all pages and remove 'active' class from nav buttons
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+
+            const navButtons = document.querySelectorAll('.nav-button');
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // 2. Show the selected page and set the corresponding button as 'active'
+            document.getElementById(pageId).classList.add('active');
+            
+            // Find the button that was clicked and add the 'active' class
+            const clickedButton = document.querySelector(`[onclick="showPage('${pageId}')"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+        }
+
+        // Initialize: Ensure the Nepse page is active when the content is first shown
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('nepse');
+        });
+    </script>
+
+</body>
+</html>
